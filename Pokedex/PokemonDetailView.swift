@@ -71,7 +71,7 @@ struct PokemonDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.yellow, lineWidth: 15) // 🟡 Bordure jaune
+                .stroke(Color.yellow, lineWidth: 20) // 🟡 Bordure jaune
         )
     }
 }

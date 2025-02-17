@@ -27,10 +27,10 @@ struct PokemonListView: View {
                                     EmptyView()
                                 }
                             }
-                            Spacer()
+                           
                             Text(pokemon.name.capitalized)
                                 .font(.headline)
-                            
+                            Spacer()
                             Button(action: {
                                 favoriteManager.toggleFavorite(pokemon: pokemon)
                             }) {
@@ -48,11 +48,22 @@ struct PokemonListView: View {
                         }
                     }
                 }
-                .navigationTitle("Pokédex")
+                .toolbar {
+                                 // Personnaliser le titre dans la barre de navigation
+                                 ToolbarItem(placement: .principal) {
+                                     Text("Pokédex")
+                                         .font(.system(size: 50, weight: .bold)) // Taille et poids du texte
+                                         .foregroundColor(.yellow) // Couleur du titre
+                                         .padding(.top, 50)
+
+                                 }
+                             }
+                .background(Color.red)
                 .onAppear {
                     viewModel.loadData()
                 }
             }
+            
             
             // Custom Sheet with animation
             if showDetailView, let selectedPokemon = selectedPokemon {
