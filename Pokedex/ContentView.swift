@@ -10,13 +10,14 @@ import CoreData
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var favoriteManager = FavoriteManager()  // Gère les favoris globalement
+    
     var body: some View {
-        // On emballe la vue principale dans une NavigationView
-        NavigationView {
-            PokemonListView() // La vue qui affiche la liste des Pokémon
-        }
+        PokemonListView()
+            .environmentObject(favoriteManager)  // Passe l'objet FavoriteManager à la vue enfant
     }
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

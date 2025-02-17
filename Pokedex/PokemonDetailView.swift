@@ -7,8 +7,9 @@
 
 import SwiftUI
 struct PokemonDetailView: View {
-    var pokemon: Pokemon  // Accepte un Pokemon et pas un Binding<Pokemon>
-
+    @EnvironmentObject var favoriteManager: FavoriteManager  // Récupère le gestionnaire de favoris
+    var pokemon: Pokemon
+    
     var body: some View {
         VStack {
             AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
@@ -35,11 +36,11 @@ struct PokemonDetailView: View {
             ForEach(pokemon.stats, id: \.statName) { stat in
                 Text("\(stat.statName): \(stat.baseStat)")
             }
-
+            
             Button(action: {
-                // Action pour ajouter aux favoris (ou autre comportement)
+                favoriteManager.toggleFavorite(pokemon: pokemon)  // Ajoute ou retire des favoris
             }) {
-                Text(pokemon.isFavorite ? "Remove from Favorites" : "Add to Favorites")
+                Text(favoriteManager.isFavorite(pokemon: pokemon) ? "Remove from Favorites" : "Add to Favorites")
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
@@ -47,6 +48,5 @@ struct PokemonDetailView: View {
             }
             .padding()
         }
-        .padding()
     }
 }

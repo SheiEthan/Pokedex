@@ -20,6 +20,7 @@
 		F44E688E2D633AE1000599A9 /* PokemonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E688D2D633AE1000599A9 /* PokemonViewModel.swift */; };
 		F44E68902D633AF7000599A9 /* PokemonListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E688F2D633AF7000599A9 /* PokemonListView.swift */; };
 		F44E68972D635E32000599A9 /* PokemonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E68962D635E32000599A9 /* PokemonDetailView.swift */; };
+		F44E68992D6366D5000599A9 /* FavoriteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E68982D6366D5000599A9 /* FavoriteManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		F44E688D2D633AE1000599A9 /* PokemonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonViewModel.swift; sourceTree = "<group>"; };
 		F44E688F2D633AF7000599A9 /* PokemonListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonListView.swift; sourceTree = "<group>"; };
 		F44E68962D635E32000599A9 /* PokemonDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonDetailView.swift; sourceTree = "<group>"; };
+		F44E68982D6366D5000599A9 /* FavoriteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				F44E688D2D633AE1000599A9 /* PokemonViewModel.swift */,
 				F44E688F2D633AF7000599A9 /* PokemonListView.swift */,
 				F44E68962D635E32000599A9 /* PokemonDetailView.swift */,
+				F44E68982D6366D5000599A9 /* FavoriteManager.swift */,
 			);
 			path = Pokedex;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				5709AC2F2D632B5E0097ADFB /* Pokemon.swift in Sources */,
 				F44E68972D635E32000599A9 /* PokemonDetailView.swift in Sources */,
 				5709AC022D631F6C0097ADFB /* Pokedex.xcdatamodeld in Sources */,
+				F44E68992D6366D5000599A9 /* FavoriteManager.swift in Sources */,
 				F44E688E2D633AE1000599A9 /* PokemonViewModel.swift in Sources */,
 				5709ABFF2D631F6C0097ADFB /* Persistence.swift in Sources */,
 				5709ABF82D631F6A0097ADFB /* ContentView.swift in Sources */,
