@@ -19,6 +19,7 @@
 		5709AC2F2D632B5E0097ADFB /* Pokemon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5709AC2E2D632B5E0097ADFB /* Pokemon.swift */; };
 		F44E688E2D633AE1000599A9 /* PokemonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E688D2D633AE1000599A9 /* PokemonViewModel.swift */; };
 		F44E68902D633AF7000599A9 /* PokemonListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E688F2D633AF7000599A9 /* PokemonListView.swift */; };
+		F44E68972D635E32000599A9 /* PokemonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44E68962D635E32000599A9 /* PokemonDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		5709AC2E2D632B5E0097ADFB /* Pokemon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pokemon.swift; sourceTree = "<group>"; };
 		F44E688D2D633AE1000599A9 /* PokemonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonViewModel.swift; sourceTree = "<group>"; };
 		F44E688F2D633AF7000599A9 /* PokemonListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonListView.swift; sourceTree = "<group>"; };
+		F44E68962D635E32000599A9 /* PokemonDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +117,7 @@
 				5709AC2E2D632B5E0097ADFB /* Pokemon.swift */,
 				F44E688D2D633AE1000599A9 /* PokemonViewModel.swift */,
 				F44E688F2D633AF7000599A9 /* PokemonListView.swift */,
+				F44E68962D635E32000599A9 /* PokemonDetailView.swift */,
 			);
 			path = Pokedex;
 			sourceTree = "<group>";
@@ -275,6 +278,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5709AC2F2D632B5E0097ADFB /* Pokemon.swift in Sources */,
+				F44E68972D635E32000599A9 /* PokemonDetailView.swift in Sources */,
 				5709AC022D631F6C0097ADFB /* Pokedex.xcdatamodeld in Sources */,
 				F44E688E2D633AE1000599A9 /* PokemonViewModel.swift in Sources */,
 				5709ABFF2D631F6C0097ADFB /* Persistence.swift in Sources */,

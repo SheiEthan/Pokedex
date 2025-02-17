@@ -4,6 +4,13 @@ struct Pokemon: Identifiable, Codable {
     var id: Int
     var name: String
     var imageUrl: String
+    var types: [String]  // Liste des types du Pokémon
+    var stats: [Stat]    // Liste des statistiques du Pokémon
+    
+    struct Stat: Codable {
+        var statName: String
+        var baseStat: Int
+    }
 }
 
 struct PokemonListResponse: Codable {
@@ -17,8 +24,27 @@ struct PokemonResponse: Codable {
 
 struct PokemonDetails: Codable {
     let sprites: Sprites
-}
-
-struct Sprites: Codable {
-    let front_default: String
+    let types: [PokemonType]
+    let stats: [Stat]  // Les statistiques du Pokémon
+    
+    struct Sprites: Codable {
+        let front_default: String
+    }
+    
+    struct PokemonType: Codable {
+        let type: TypeInfo
+        
+        struct TypeInfo: Codable {
+            let name: String
+        }
+    }
+    
+    struct Stat: Codable {
+        let stat: StatInfo
+        let base_stat: Int
+        
+        struct StatInfo: Codable {
+            let name: String
+        }
+    }
 }

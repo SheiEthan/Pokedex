@@ -55,7 +55,16 @@ class PokemonViewModel: ObservableObject {
             .decode(type: PokemonDetails.self, decoder: JSONDecoder())
             .map { details in
                 // Créer un Pokémon complet avec son image
-                return Pokemon(id: Int(pokemon.url.hash), name: pokemon.name, imageUrl: details.sprites.front_default)
+                return Pokemon(
+                    id: Int(pokemon.url.hash),  // Utilisation du hash de l'URL pour l'id unique
+                    name: pokemon.name,
+                    imageUrl: details.sprites.front_default,
+                    types: details.types.map { $0.type.name },  // Récupère les noms des types
+                    stats: details.stats.map { stat in
+                        Pokemon.Stat(statName: stat.stat.name, baseStat: stat.base_stat)  // Mappe les statistiques
+                    }
+                )
+
             }
             .eraseToAnyPublisher()
     }
