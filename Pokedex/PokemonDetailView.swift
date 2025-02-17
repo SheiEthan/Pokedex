@@ -1,17 +1,25 @@
-//
-//  PokemonDetailView.swift
-//  Pokedex
-//
-//  Created by Manon LEVET on 2/17/25.
-//
-
 import SwiftUI
 struct PokemonDetailView: View {
-    @EnvironmentObject var favoriteManager: FavoriteManager  // Récupère le gestionnaire de favoris
     var pokemon: Pokemon
-    
+    var onClose: () -> Void
+
     var body: some View {
         VStack {
+            HStack {
+                Spacer()
+                Button(action: {
+                    withAnimation(.spring()) {
+                        onClose()
+                    }
+                }) {
+                    Image(systemName: "chevron.left.circle.fill")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                        .foregroundColor(.gray)
+                        .padding()
+                }
+            }
+
             AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
                 switch phase {
                 case .empty:
@@ -24,29 +32,45 @@ struct PokemonDetailView: View {
                     EmptyView()
                 }
             }
+
             Text(pokemon.name.capitalized)
-                .font(.title)
-                .padding()
-            
-            Text("Types: \(pokemon.types.joined(separator: ", "))")
-                .font(.subheadline)
-            
-            Text("Stats:")
-                .font(.headline)
-            ForEach(pokemon.stats, id: \.statName) { stat in
-                Text("\(stat.statName): \(stat.baseStat)")
-            }
-            
-            Button(action: {
-                favoriteManager.toggleFavorite(pokemon: pokemon)  // Ajoute ou retire des favoris
-            }) {
-                Text(favoriteManager.isFavorite(pokemon: pokemon) ? "Remove from Favorites" : "Add to Favorites")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                .font(.largeTitle)
+                .bold()
+                .padding(.bottom, 10)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Types:")
+                    .font(.headline)
+                HStack {
+                    ForEach(pokemon.types, id: \.self) { type in
+                        Text(type.capitalized)
+                            .padding(8)
+                            .background(Color.blue.opacity(0.2))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+
+                Text("Stats:")
+                    .font(.headline)
+                ForEach(pokemon.stats, id: \.statName) { stat in
+                    HStack {
+                        Text(stat.statName.capitalized)
+                            .frame(width: 100, alignment: .leading)
+                        ProgressView(value: Float(stat.baseStat), total: 150)
+                            .frame(width: 150)
+                    }
+                }
             }
             .padding()
+
+            Spacer()
         }
+        .padding()
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.yellow, lineWidth: 15) // 🟡 Bordure jaune
+        )
     }
 }
