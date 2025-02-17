@@ -6,7 +6,7 @@ struct PokemonDetailView: View {
     var body: some View {
         VStack {
             HStack {
-                Spacer()
+               
                 Button(action: {
                     withAnimation(.spring()) {
                         onClose()
@@ -18,6 +18,7 @@ struct PokemonDetailView: View {
                         .foregroundColor(.gray)
                         .padding()
                 }
+                Spacer()
             }
 
             AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
