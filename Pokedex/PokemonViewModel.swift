@@ -62,7 +62,8 @@ class PokemonViewModel: ObservableObject {
                     types: details.types.map { $0.type.name },  // Récupère les noms des types
                     stats: details.stats.map { stat in
                         Pokemon.Stat(statName: stat.stat.name, baseStat: stat.base_stat)  // Mappe les statistiques
-                    }
+                    },
+                    isFavorite: false
                 )
 
             }

@@ -1,51 +1,46 @@
 import SwiftUI
-
 struct PokemonListView: View {
     @StateObject var viewModel = PokemonViewModel()
-    @State private var selectedPokemon: Pokemon? = nil // Pokémon sélectionné
-    @State private var isSheetPresented = false // Gère l'affichage du sheet
+    @State private var selectedPokemon: Pokemon? // Gère le Pokémon sélectionné
+    @State private var showDetailSheet = false // Indicateur pour afficher ou non le sheet
     
     var body: some View {
+        NavigationView {
             List(viewModel.pokemonList) { pokemon in
-                HStack {
-                    if let url = URL(string: pokemon.imageUrl), !pokemon.imageUrl.isEmpty {
-                        AsyncImage(url: url) { phase in
+                Button(action: {
+                    // Lorsque l'utilisateur appuie sur un Pokémon, on l'assigne à `selectedPokemon`
+                    selectedPokemon = pokemon
+                    showDetailSheet = true // On affiche le sheet
+                }) {
+                    HStack {
+                        AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
                             switch phase {
                             case .empty:
                                 ProgressView()
-                                    .frame(width: 50, height: 50)
                             case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 50, height: 50)
+                                image.resizable().scaledToFit().frame(width: 50, height: 50)
                             case .failure:
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .frame(width: 50, height: 50)
                             @unknown default:
                                 EmptyView()
                             }
                         }
+                        Spacer()
+                        Text(pokemon.name.capitalized)
+                            .font(.headline)
                     }
-                    Spacer()
-                    Text(pokemon.name.capitalized)
-                        .font(.headline)
-                }
-                .onTapGesture {
-                    selectedPokemon = pokemon
-                    isSheetPresented.toggle() // Afficher le sheet
                 }
             }
             .navigationTitle("Pokédex")
             .onAppear {
                 viewModel.loadData()
             }
-            .sheet(isPresented: $isSheetPresented) {
-                // Affiche le Sheet avec les détails du Pokémon sélectionné
+            // Présentation du sheet lorsque showDetailSheet est true
+            .sheet(isPresented: $showDetailSheet) {
                 if let selectedPokemon = selectedPokemon {
                     PokemonDetailView(pokemon: selectedPokemon)
                 }
             }
         }
     }
-
+}
