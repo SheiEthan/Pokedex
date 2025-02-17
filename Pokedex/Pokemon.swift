@@ -1,19 +1,24 @@
-//
-//  Pokemon.swift
-//  Pokedex
-//
-//  Created by Ethan TILLIER on 2/17/25.
-//
+import Foundation
 
-import SwiftUI
-
-struct Pokemon: Decodable {
+struct Pokemon: Identifiable, Codable {
+    var id: Int
     var name: String
-    var image: String
-    var types: [String]
-    var stats: [String]
-    
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+    var imageUrl: String
+}
+
+struct PokemonListResponse: Codable {
+    let results: [PokemonResponse]
+}
+
+struct PokemonResponse: Codable {
+    let name: String
+    let url: String
+}
+
+struct PokemonDetails: Codable {
+    let sprites: Sprites
+}
+
+struct Sprites: Codable {
+    let front_default: String
 }

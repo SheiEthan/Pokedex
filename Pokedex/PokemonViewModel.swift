@@ -1,0 +1,62 @@
+import SwiftUI
+import Combine
+
+class PokemonViewModel: ObservableObject {
+    @Published var pokemonList: [Pokemon] = []
+    private var cancellables = Set<AnyCancellable>()
+    
+    func loadData() {
+        // Si la liste est déjà remplie, on ne refait pas l'appel API
+        if pokemonList.isEmpty {
+            fetchPokemonList()
+        }
+    }
+    
+    private func fetchPokemonList() {
+        let url = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=100")!
+        
+        URLSession.shared.dataTaskPublisher(for: url)
+            .map { $0.data }
+            .decode(type: PokemonListResponse.self, decoder: JSONDecoder())
+            .map { $0.results }
+            .flatMap { [weak self] results in
+                guard let self = self else {
+                    return Empty<Pokemon, Error>().eraseToAnyPublisher() // Flux vide si self est nil
+                }
+                let pokemonPublishers = results.map { pokemon in
+                    self.fetchPokemonDetails(pokemon: pokemon)
+                }
+                return Publishers.MergeMany(pokemonPublishers)
+                    .eraseToAnyPublisher() // Nous retournons un AnyPublisher
+            }
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error fetching Pokémon data: \(error)")
+                }
+            }, receiveValue: { [weak self] pokemon in
+                self?.addPokemonIfNotExists(pokemon)  // Ajouter Pokémon seulement s'il n'existe pas déjà
+            })
+            .store(in: &cancellables)
+    }
+    
+    private func addPokemonIfNotExists(_ pokemon: Pokemon) {
+        // Vérifie si le Pokémon existe déjà dans la liste (en fonction de l'id ou du nom)
+        if !pokemonList.contains(where: { $0.id == pokemon.id }) {
+            pokemonList.append(pokemon)
+        }
+    }
+    
+    private func fetchPokemonDetails(pokemon: PokemonResponse) -> AnyPublisher<Pokemon, Error> {
+        let url = URL(string: pokemon.url)!
+        
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map { $0.data }
+            .decode(type: PokemonDetails.self, decoder: JSONDecoder())
+            .map { details in
+                // Créer un Pokémon complet avec son image
+                return Pokemon(id: Int(pokemon.url.hash), name: pokemon.name, imageUrl: details.sprites.front_default)
+            }
+            .eraseToAnyPublisher()
+    }
+}
