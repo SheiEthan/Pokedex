@@ -2,13 +2,28 @@ import SwiftUI
 import Combine
 
 class PokemonViewModel: ObservableObject {
-    @Published var pokemonList: [Pokemon] = []
+    @Published var pokemonList: [Pokemon] = []  // Liste complète des Pokémon
+    @Published var filteredPokemonList: [Pokemon] = []  // Liste filtrée par le texte de recherche
+    @Published var searchText: String = ""  // Texte de recherche
+    
     private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        // Observation du texte de recherche
+        $searchText
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.filterPokemon()
+            }
+            .store(in: &cancellables)
+    }
     
     func loadData() {
         // Si la liste est déjà remplie, on ne refait pas l'appel API
         if pokemonList.isEmpty {
             fetchPokemonList()
+        } else {
+            filteredPokemonList = pokemonList  // Si déjà rempli, on affiche tout
         }
     }
     
@@ -44,6 +59,7 @@ class PokemonViewModel: ObservableObject {
         // Vérifie si le Pokémon existe déjà dans la liste (en fonction de l'id ou du nom)
         if !pokemonList.contains(where: { $0.id == pokemon.id }) {
             pokemonList.append(pokemon)
+            filteredPokemonList = pokemonList  // On met à jour la liste filtrée avec tous les Pokémon
         }
     }
     
@@ -54,7 +70,7 @@ class PokemonViewModel: ObservableObject {
             .map { $0.data }
             .decode(type: PokemonDetails.self, decoder: JSONDecoder())
             .map { details in
-                // Créer un Pokémon complet avec son image
+                // Créer un Pokémon complet avec son image et ses types/statistiques
                 return Pokemon(
                     id: Int(pokemon.url.hash),  // Utilisation du hash de l'URL pour l'id unique
                     name: pokemon.name,
@@ -65,8 +81,16 @@ class PokemonViewModel: ObservableObject {
                     },
                     isFavorite: false
                 )
-
             }
             .eraseToAnyPublisher()
+    }
+    
+    // Filtrage des Pokémon en fonction du texte de recherche
+    func filterPokemon() {
+        if searchText.isEmpty {
+            filteredPokemonList = pokemonList  // Si rien n'est tapé, on affiche tous les Pokémon
+        } else {
+            filteredPokemonList = pokemonList.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
     }
 }
