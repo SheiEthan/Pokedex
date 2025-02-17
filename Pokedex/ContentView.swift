@@ -9,77 +9,127 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @StateObject private var viewModel = PokemonViewModel()
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+        var body: some View {
+            NavigationView {
+                List(viewModel.pokemonList) { pokemon in
+                    HStack {
+                        if let imageUrl = pokemon.imageUrl, let url = URL(string: imageUrl) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                        .frame(width: 50, height: 50)
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 50)
+                                case .failure:
+                                    // Affiche un symbole si l'image ne peut pas être chargée
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .frame(width: 50, height: 50)
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                        }
+                        Spacer()
+                        Text(pokemon.name.capitalized)
+                            .font(.headline)
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .navigationTitle("Pokédex")
+                .onAppear {
+                    viewModel.loadData()
                 }
             }
-            Text("Select an item")
+        }
+
+        private func extractPokemonID(from url: String) -> String {
+            return url
+                .split(separator: "/")
+                .last.map(String.init) ?? "?"
         }
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+    // Modèles à l'intérieur du même fichier
+    struct PokemonListResponse: Codable {
+        let results: [PokemonListItem]
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
+    struct PokemonListItem: Codable, Identifiable {
+        let id = UUID() // Identifiant unique pour List
+        let name: String
+        let url: String
+        var imageUrl: String?
+    }
 
+class PokemonViewModel: ObservableObject {
+    @Published var pokemonList: [PokemonListItem] = []
+    
+    func loadData() {
+        guard let url = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=15") else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data else { return }
             do {
-                try viewContext.save()
+                let decodedData = try JSONDecoder().decode(PokemonListResponse.self, from: data)
+                
+                // Récupérer les détails pour chaque Pokémon
+                let group = DispatchGroup()
+                var updatedPokemonList: [PokemonListItem] = []
+                
+                for pokemon in decodedData.results {
+                    group.enter()
+                    self.fetchPokemonDetails(for: pokemon) { detailedPokemon in
+                        updatedPokemonList.append(detailedPokemon)  // Ajout du Pokémon avec l'image mise à jour
+                        group.leave()
+                    }
+                }
+                
+                group.notify(queue: .main) {
+                    self.pokemonList = updatedPokemonList  // Une fois toutes les images récupérées, mettre à jour la liste
+                }
+                
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                print("Erreur de décodage : \(error)")
             }
-        }
+        }.resume()
+    }
+    
+    private func fetchPokemonDetails(for pokemon: PokemonListItem, completion: @escaping (PokemonListItem) -> Void) {
+        let pokemonDetailURL = pokemon.url
+        guard let url = URL(string: pokemonDetailURL) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data else { return }
+            do {
+                let pokemonDetail = try JSONDecoder().decode(PokemonDetail.self, from: data)
+                var updatedPokemon = pokemon
+                // Vérification si l'image existe, sinon utiliser une image par défaut pour ce Pokémon
+                updatedPokemon.imageUrl = pokemonDetail.sprites.frontDefault ?? "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png" // Image par défaut du Pokémon #1 (Bulbizarre)
+                
+                DispatchQueue.main.async {
+                    completion(updatedPokemon)  // Retourner le Pokémon mis à jour avec l'image
+                }
+            } catch {
+                print("Erreur lors de la récupération des détails : \(error)")
+            }
+        }.resume()
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
+// Structure des détails du Pokémon pour récupérer l'image
+struct PokemonDetail: Codable {
+    let sprites: PokemonSprites
+}
+
+struct PokemonSprites: Codable {
+    let frontDefault: String?
+}
+    
 
 #Preview {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
