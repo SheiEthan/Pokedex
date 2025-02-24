@@ -2,7 +2,7 @@ import CoreData
 import SwiftUI
 
 class FavoriteManager: ObservableObject {
-    @Published var favorites: [FavoritePokemonEntity] = [] // Utilisation de FavoritePokemonEntity
+    @Published var favorites: [FavoritePokemonEntity] = []
     private let container: NSPersistentContainer
 
     init() {
@@ -26,7 +26,6 @@ class FavoriteManager: ObservableObject {
         }
     }
 
-    // Ajouter un favori
     // Ajouter un favori
     func addFavorite(pokemon: Pokemon) {
         // Vérifier si le Pokémon est déjà dans les favoris
@@ -68,7 +67,6 @@ class FavoriteManager: ObservableObject {
         favorites.contains(where: { $0.idPokemon == Int64(pokemon.id) })
     }
 
-    // Sauvegarder le contexte
     // Sauvegarder le contexte
     private func saveContext() {
         do {

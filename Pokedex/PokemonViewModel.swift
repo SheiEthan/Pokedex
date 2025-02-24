@@ -81,7 +81,7 @@ class PokemonViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
     
-    // 🎯 Fonction pour filtrer les Pokémon par type et texte de recherche
+    // Fonction pour filtrer les Pokémon par type et texte de recherche
     func filterPokemon(byType type: String?) {
         filteredPokemonList = pokemonList.filter { pokemon in
             let matchesSearchText = searchText.isEmpty || pokemon.name.lowercased().contains(searchText.lowercased())
@@ -90,7 +90,7 @@ class PokemonViewModel: ObservableObject {
         }
     }
     
-    // 🔥 Met à jour la liste de tous les types disponibles à partir des Pokémon chargés
+    // Met à jour la liste de tous les types disponibles à partir des Pokémon chargés
     private func updateAllPokemonTypes() {
         let types = pokemonList.flatMap { $0.types }
         allPokemonTypes = Array(Set(types)).sorted()

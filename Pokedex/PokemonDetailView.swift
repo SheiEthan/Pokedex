@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PokemonDetailView: View {
     var pokemon: Pokemon
-    var animationNamespace: Namespace.ID  // 🔑 Récupère le namespace pour le zoom
+    var animationNamespace: Namespace.ID
     var onClose: () -> Void
     
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
@@ -28,7 +28,7 @@ struct PokemonDetailView: View {
                 Spacer()
             }
 
-            // 📸 Image avec matchedGeometryEffect + animations existantes
+            // Image avec matchedGeometryEffect + animations existantes
             AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
                 switch phase {
                 case .empty:
@@ -38,7 +38,7 @@ struct PokemonDetailView: View {
                         .scaledToFit()
                         .frame(width: 150, height: 150)
                         .matchedGeometryEffect(id: "pokemonImage-\(pokemon.id)", in: animationNamespace)  // 🔑 Zoom lié à la liste
-                        .offset(y: floatImage ? -10 : 10)  // 🌊 Effet de flottement
+                        .offset(y: floatImage ? -10 : 10)  // Effet de flottement
                         .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: floatImage)
                         .scaleEffect(animateStats ? 1 : 0.8)  // Rebond à l’apparition
                         .animation(.spring(response: 0.5, dampingFraction: 0.4), value: animateStats)

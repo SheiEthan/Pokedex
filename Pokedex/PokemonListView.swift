@@ -10,7 +10,7 @@ struct PokemonListView: View {
     @State private var showFavoritesOnly = false
     @State private var sortOrder: SortOrder = .normal // Valeur par défaut
 
-    @Namespace private var animationNamespace  // 🔑 Namespace pour l’animation de zoom
+    @Namespace private var animationNamespace  // Namespace pour l’animation de zoom
 
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     
@@ -34,10 +34,10 @@ struct PokemonListView: View {
                            UserDefaults.standard.set(newValue, forKey: "isDarkMode")
                        }
                    }
-                    // 🔎 Barre de recherche
+                    // Barre de recherche
                     SearchBar(text: $viewModel.searchText)
 
-                    // 📝 Sélecteur de type
+                    // Sélecteur de type
                     HStack {
                       
                         Text("Filtrer par type").font(.headline)
@@ -54,11 +54,11 @@ struct PokemonListView: View {
                     }
                     .padding(.horizontal)
 
-                    // ✅ Toggle pour afficher seulement les favoris
+                    // Toggle pour afficher seulement les favoris
                     Toggle(isOn: $showFavoritesOnly) {
                         Text("Afficher seulement les favoris").font(.subheadline)
                     }.padding(.horizontal)
-                    // 📋 Tri des Pokémon
+                    // Tri des Pokémon
                     Picker("Trier", selection: $sortOrder) {
                         Text("Normal").tag(SortOrder.normal)
                         Text("Alphabétique").tag(SortOrder.alphabetical)
@@ -67,10 +67,10 @@ struct PokemonListView: View {
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.horizontal)
 
-                    // 📄 Liste des Pokémon filtrée et triée
+                    // Liste des Pokémon filtrée et triée
                     List(sortedPokemonList()) { pokemon in
                         HStack {
-                            // 🖼️ Image du Pokémon
+                            // Image du Pokémon
                             AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
                                 switch phase {
                                 case .empty:
@@ -79,7 +79,7 @@ struct PokemonListView: View {
                                     image.resizable()
                                         .scaledToFit()
                                         .frame(width: 50, height: 50)
-                                        .matchedGeometryEffect(id: "pokemonImage-\(pokemon.id)", in: animationNamespace)  // 🔑 Effet de zoom lié
+                                        .matchedGeometryEffect(id: "pokemonImage-\(pokemon.id)", in: animationNamespace)  // Effet de zoom lié
                                 case .failure:
                                     Image(systemName: "exclamationmark.triangle.fill")
                                 @unknown default:
@@ -92,7 +92,7 @@ struct PokemonListView: View {
 
                             Spacer()
 
-                            // 🎯 Zone cliquable entre le texte et l'étoile
+                            // Zone cliquable entre le texte et l'étoile
                             Button(action: {
                                 withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                                     selectedPokemon = pokemon
@@ -102,7 +102,7 @@ struct PokemonListView: View {
                                 Spacer() // Cet espace fait en sorte qu'on peut cliquer entre le texte et l'étoile
                             }
 
-                            // ⭐️ Bouton favori tout à droite
+                            // Bouton favori tout à droite
                             Button(action: {
                                 favoriteManager.toggleFavorite(pokemon: pokemon)
                             }) {
@@ -116,7 +116,7 @@ struct PokemonListView: View {
                 .onAppear { viewModel.loadData() }
             }
 
-            // 📝 Vue détail avec matchedGeometryEffect
+            // Vue détail avec matchedGeometryEffect
             if showDetailView, let selectedPokemon = selectedPokemon {
                 Color.black.opacity(0.4)
                     .edgesIgnoringSafeArea(.all)
