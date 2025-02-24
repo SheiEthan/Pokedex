@@ -12,6 +12,8 @@ struct PokemonListView: View {
 
     @Namespace private var animationNamespace  // 🔑 Namespace pour l’animation de zoom
 
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
+    
     enum SortOrder {
         case normal, alphabetical, reverseAlphabetical
     }
@@ -20,11 +22,24 @@ struct PokemonListView: View {
         ZStack {
             NavigationView {
                 VStack {
+                    HStack {
+                                           Spacer() // Pour pousser les éléments vers la droite
+                                           Text("Mode sombre")
+                                               .font(.subheadline)
+                                           Toggle(isOn: $isDarkMode) {
+                                               EmptyView() // Vide pour n'afficher que le toggle
+                                           }
+                                           .labelsHidden() // Cache le label du Toggle
+                                           .onChange(of: isDarkMode) { newValue in
+                                               UserDefaults.standard.set(newValue, forKey: "isDarkMode")
+                                           }
+                                       }
                     // 🔎 Barre de recherche
                     SearchBar(text: $viewModel.searchText)
 
                     // 📝 Sélecteur de type
                     HStack {
+                      
                         Text("Filtrer par type").font(.headline)
                         Picker("Type", selection: $selectedType) {
                             Text("Tous").tag("Tous")
@@ -43,8 +58,6 @@ struct PokemonListView: View {
                     Toggle(isOn: $showFavoritesOnly) {
                         Text("Afficher seulement les favoris").font(.subheadline)
                     }
-                    .padding()
-
                     // 📋 Tri des Pokémon
                     Picker("Trier", selection: $sortOrder) {
                         Text("Normal").tag(SortOrder.normal)
@@ -52,7 +65,7 @@ struct PokemonListView: View {
                         Text("Décroissant").tag(SortOrder.reverseAlphabetical)
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                    .padding()
+                   
 
                     // 📄 Liste des Pokémon filtrée et triée
                     List(sortedPokemonList()) { pokemon in
@@ -98,7 +111,6 @@ struct PokemonListView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
-                        .padding()
                     }
                 }
                 .onAppear { viewModel.loadData() }

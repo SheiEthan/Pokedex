@@ -4,12 +4,19 @@
 //
 //  Created by Ethan TILLIER on 2/17/25.
 //
+//
+//  PokedexApp.swift
+//  Pokedex
+//
+//  Created by Ethan TILLIER on 2/17/25.
+//
 
 import SwiftUI
 import UserNotifications
 
 @main
 struct PokedexApp: App {
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false  // Stocke l'état du mode sombre
     let persistenceController = PersistenceController.shared
 
     init() {
@@ -21,6 +28,13 @@ struct PokedexApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .preferredColorScheme(isDarkMode ? .dark : .light) // Applique le mode clair/sombre en fonction de la variable isDarkMode
+                .onAppear {
+                    // Vérifie si un mode a déjà été défini par l'utilisateur
+                    if let savedMode = UserDefaults.standard.value(forKey: "isDarkMode") as? Bool {
+                        isDarkMode = savedMode
+                    }
+                }
         }
     }
 

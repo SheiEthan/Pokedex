@@ -4,6 +4,8 @@ struct PokemonDetailView: View {
     var pokemon: Pokemon
     var animationNamespace: Namespace.ID  // 🔑 Récupère le namespace pour le zoom
     var onClose: () -> Void
+    
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
 
     @State private var animateImage = false
     @State private var animateStats = false
@@ -86,8 +88,7 @@ struct PokemonDetailView: View {
             Spacer()
         }
         .padding()
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .background(isDarkMode ? Color.black : Color.white)    
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.yellow, lineWidth: 20)
