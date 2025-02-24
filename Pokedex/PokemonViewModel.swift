@@ -2,28 +2,30 @@ import SwiftUI
 import Combine
 
 class PokemonViewModel: ObservableObject {
-    @Published var pokemonList: [Pokemon] = []  // Liste complète des Pokémon
-    @Published var filteredPokemonList: [Pokemon] = []  // Liste filtrée par le texte de recherche
-    @Published var searchText: String = ""  // Texte de recherche
+    @Published var pokemonList: [Pokemon] = []
+    @Published var filteredPokemonList: [Pokemon] = []
+    @Published var searchText: String = ""
+    
+    var allPokemonTypes: [String] = []
     
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        // Observation du texte de recherche
+        // Observation du texte de recherche pour filtrer automatiquement
         $searchText
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.filterPokemon()
+                self?.filterPokemon(byType: nil)
             }
             .store(in: &cancellables)
     }
     
     func loadData() {
-        // Si la liste est déjà remplie, on ne refait pas l'appel API
         if pokemonList.isEmpty {
             fetchPokemonList()
         } else {
-            filteredPokemonList = pokemonList  // Si déjà rempli, on affiche tout
+            filteredPokemonList = pokemonList
+            updateAllPokemonTypes()
         }
     }
     
@@ -35,31 +37,26 @@ class PokemonViewModel: ObservableObject {
             .decode(type: PokemonListResponse.self, decoder: JSONDecoder())
             .map { $0.results }
             .flatMap { [weak self] results in
-                guard let self = self else {
-                    return Empty<Pokemon, Error>().eraseToAnyPublisher() // Flux vide si self est nil
-                }
-                let pokemonPublishers = results.map { pokemon in
-                    self.fetchPokemonDetails(pokemon: pokemon)
-                }
-                return Publishers.MergeMany(pokemonPublishers)
-                    .eraseToAnyPublisher() // Nous retournons un AnyPublisher
+                guard let self = self else { return Empty<Pokemon, Error>().eraseToAnyPublisher() }
+                let publishers = results.map { self.fetchPokemonDetails(pokemon: $0) }
+                return Publishers.MergeMany(publishers).eraseToAnyPublisher()
             }
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
-                    print("Error fetching Pokémon data: \(error)")
+                    print("❌ Erreur de récupération : \(error)")
                 }
             }, receiveValue: { [weak self] pokemon in
-                self?.addPokemonIfNotExists(pokemon)  // Ajouter Pokémon seulement s'il n'existe pas déjà
+                self?.addPokemonIfNotExists(pokemon)
             })
             .store(in: &cancellables)
     }
     
     private func addPokemonIfNotExists(_ pokemon: Pokemon) {
-        // Vérifie si le Pokémon existe déjà dans la liste (en fonction de l'id ou du nom)
         if !pokemonList.contains(where: { $0.id == pokemon.id }) {
             pokemonList.append(pokemon)
-            filteredPokemonList = pokemonList  // On met à jour la liste filtrée avec tous les Pokémon
+            filteredPokemonList = pokemonList
+            updateAllPokemonTypes()
         }
     }
     
@@ -70,27 +67,32 @@ class PokemonViewModel: ObservableObject {
             .map { $0.data }
             .decode(type: PokemonDetails.self, decoder: JSONDecoder())
             .map { details in
-                // Créer un Pokémon complet avec son image et ses types/statistiques
-                return Pokemon(
-                    id: Int(pokemon.url.hash),  // Utilisation du hash de l'URL pour l'id unique
+                Pokemon(
+                    id: Int(pokemon.url.hash),
                     name: pokemon.name,
                     imageUrl: details.sprites.front_default,
-                    types: details.types.map { $0.type.name },  // Récupère les noms des types
+                    types: details.types.map { $0.type.name },
                     stats: details.stats.map { stat in
-                        Pokemon.Stat(statName: stat.stat.name, baseStat: stat.base_stat)  // Mappe les statistiques
+                        Pokemon.Stat(statName: stat.stat.name, baseStat: stat.base_stat)
                     },
-                    isFavorite: false
+                    is_favorite: false
                 )
             }
             .eraseToAnyPublisher()
     }
     
-    // Filtrage des Pokémon en fonction du texte de recherche
-    func filterPokemon() {
-        if searchText.isEmpty {
-            filteredPokemonList = pokemonList  // Si rien n'est tapé, on affiche tous les Pokémon
-        } else {
-            filteredPokemonList = pokemonList.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+    // 🎯 Fonction pour filtrer les Pokémon par type et texte de recherche
+    func filterPokemon(byType type: String?) {
+        filteredPokemonList = pokemonList.filter { pokemon in
+            let matchesSearchText = searchText.isEmpty || pokemon.name.lowercased().contains(searchText.lowercased())
+            let matchesType = (type == nil || type == "Tous") || pokemon.types.contains(type!)
+            return matchesSearchText && matchesType
         }
+    }
+    
+    // 🔥 Met à jour la liste de tous les types disponibles à partir des Pokémon chargés
+    private func updateAllPokemonTypes() {
+        let types = pokemonList.flatMap { $0.types }
+        allPokemonTypes = Array(Set(types)).sorted()
     }
 }

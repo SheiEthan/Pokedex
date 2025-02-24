@@ -1,19 +1,51 @@
 import SwiftUI
 
 struct PokemonListView: View {
-    @StateObject var viewModel = PokemonViewModel()
+    @StateObject var viewModel = PokemonViewModel()  // Initialisation du ViewModel
     @EnvironmentObject var favoriteManager: FavoriteManager
     @State private var selectedPokemon: Pokemon?
     @State private var showDetailView = false
+    @State private var selectedType: String = "Tous"  // Type sélectionné (avec "Tous" comme valeur par défaut)
+    @State private var showFavoritesOnly = false  // État du toggle pour les favoris uniquement
     
     var body: some View {
         ZStack {
             NavigationView {
                 VStack {
-                    // Ajout de la SearchBar
-                    SearchBar(text: $viewModel.searchText)  // Lier au ViewModel
+                    // 🔎 Barre de recherche
+                    SearchBar(text: $viewModel.searchText)
                     
-                    List(viewModel.filteredPokemonList) { pokemon in
+                    // 📝 Sélecteur de type avec un Picker
+                    HStack {
+                        Text("Filtrer par type")
+                            .font(.headline)
+                        
+                        Picker("Sélectionnez un type", selection: $selectedType) {
+                            Text("Tous").tag("Tous")  // Option pour afficher tous les Pokémon
+                            ForEach(viewModel.allPokemonTypes, id: \.self) { type in
+                                Text(type.capitalized).tag(type)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .padding(.horizontal)
+                        .onChange(of: selectedType) { _ in
+                            viewModel.filterPokemon(byType: selectedType)
+                        }
+                    }
+                    .padding(.vertical)
+                    
+                    // ✅ Toggle pour activer/désactiver les favoris uniquement
+                    Toggle(isOn: $showFavoritesOnly) {
+                        Text("Afficher seulement les favoris")
+                            .font(.subheadline)
+                    }
+                    .padding()
+
+                    // 📄 Liste des Pokémon filtrée en fonction du toggle
+                    List(viewModel.filteredPokemonList.filter { pokemon in
+                        // Si le toggle est activé, ne montrer que les favoris
+                        !showFavoritesOnly || favoriteManager.isFavorite(pokemon: pokemon)
+                    }) { pokemon in
                         HStack {
                             AsyncImage(url: URL(string: pokemon.imageUrl)) { phase in
                                 switch phase {
@@ -48,26 +80,14 @@ struct PokemonListView: View {
                         }
                     }
                 }
-                .toolbar {
-                                 // Personnaliser le titre dans la barre de navigation
-                                 ToolbarItem(placement: .principal) {
-                                     Text("Pokédex")
-                                         .font(.system(size: 50, weight: .bold)) // Taille et poids du texte
-                                         .foregroundColor(.yellow) // Couleur du titre
-                                         .padding(.top, 50)
-
-                                 }
-                             }
-                .background(Color.red)
                 .onAppear {
                     viewModel.loadData()
                 }
             }
             
-            
-            // Custom Sheet with animation
+            // 📝 Vue des détails du Pokémon
             if showDetailView, let selectedPokemon = selectedPokemon {
-                Color.black.opacity(0.4) // Flou d'arrière-plan
+                Color.black.opacity(0.4)
                     .edgesIgnoringSafeArea(.all)
                     .onTapGesture {
                         withAnimation(.spring()) {

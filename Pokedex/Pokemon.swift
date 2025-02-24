@@ -6,7 +6,7 @@ struct Pokemon: Identifiable, Codable {
     var imageUrl: String
     var types: [String]  // Liste des types du Pokémon
     var stats: [Stat]    // Liste des statistiques du Pokémon
-    var isFavorite: Bool
+    var is_favorite: Bool
     
     struct Stat: Codable {
         var statName: String
