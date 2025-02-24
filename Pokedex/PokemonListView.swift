@@ -23,17 +23,17 @@ struct PokemonListView: View {
             NavigationView {
                 VStack {
                     HStack {
-                                           Spacer() // Pour pousser les éléments vers la droite
-                                           Text("Mode sombre")
-                                               .font(.subheadline)
-                                           Toggle(isOn: $isDarkMode) {
-                                               EmptyView() // Vide pour n'afficher que le toggle
-                                           }
-                                           .labelsHidden() // Cache le label du Toggle
-                                           .onChange(of: isDarkMode) { newValue in
-                                               UserDefaults.standard.set(newValue, forKey: "isDarkMode")
-                                           }
-                                       }
+                       Spacer() // Pour pousser les éléments vers la droite
+                       Text("Mode sombre")
+                           .font(.subheadline)
+                       Toggle(isOn: $isDarkMode) {
+                           EmptyView() // Vide pour n'afficher que le toggle
+                       }
+                       .labelsHidden() // Cache le label du Toggle
+                       .onChange(of: isDarkMode) { newValue in
+                           UserDefaults.standard.set(newValue, forKey: "isDarkMode")
+                       }
+                   }
                     // 🔎 Barre de recherche
                     SearchBar(text: $viewModel.searchText)
 
@@ -52,12 +52,12 @@ struct PokemonListView: View {
                             viewModel.filterPokemon(byType: selectedType)
                         }
                     }
-                    .padding(.vertical)
+                    .padding(.horizontal)
 
                     // ✅ Toggle pour afficher seulement les favoris
                     Toggle(isOn: $showFavoritesOnly) {
                         Text("Afficher seulement les favoris").font(.subheadline)
-                    }
+                    }.padding(.horizontal)
                     // 📋 Tri des Pokémon
                     Picker("Trier", selection: $sortOrder) {
                         Text("Normal").tag(SortOrder.normal)
@@ -65,7 +65,7 @@ struct PokemonListView: View {
                         Text("Décroissant").tag(SortOrder.reverseAlphabetical)
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                   
+                    .padding(.horizontal)
 
                     // 📄 Liste des Pokémon filtrée et triée
                     List(sortedPokemonList()) { pokemon in
@@ -110,7 +110,7 @@ struct PokemonListView: View {
                                     .foregroundColor(.yellow)
                             }
                             .buttonStyle(PlainButtonStyle())
-                        }
+                        }.padding(.horizontal)
                     }
                 }
                 .onAppear { viewModel.loadData() }
